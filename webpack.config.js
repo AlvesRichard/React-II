@@ -1,4 +1,5 @@
 module.exports = {
+  mode: 'development',
   entry: './browser/react/index.js',
   output: {
     path: __dirname,
@@ -10,13 +11,16 @@ module.exports = {
     extensions: ['.js', '.jsx']
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /jsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
-          presets: ['react', 'env', 'stage-0']
+          presets: [
+            "@babel/preset-react",
+            "@babel/env"
+          ]
         }
       }
     ]
