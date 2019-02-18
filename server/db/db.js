@@ -9,4 +9,5 @@ console.log(chalk.yellow('Opening connection to PostgreSQL'));
 // create the database instance
 module.exports = new Sequelize(DATABASE_URI, {
   logging: false, // set to console.log to see the raw SQL queries
+  operatorsAliases: Sequelize.Op, // set operators
 });
