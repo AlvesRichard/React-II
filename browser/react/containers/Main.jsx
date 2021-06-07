@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import Albums from '../components/Albums';
 import SingleAlbum from '../components/SingleAlbum';
 import audio from '../audio';
+import {Switch, Route, Redirect} from 'react-router-dom'
 
 export default class Main extends React.Component {
   constructor(){
@@ -101,11 +102,17 @@ export default class Main extends React.Component {
       <div id="main" className="container-fluid">
         <Sidebar deselectAlbum={this.deselectAlbum} />
         <div className="col-xs-10">
-          {!selectedAlbum.id ?
+          {/* /* {!selectedAlbum.id ?
             <Albums albums={albums} selectAlbum={this.selectAlbum} />
             :
             <SingleAlbum selectedSong={selectedSong} start={this.start} album={selectedAlbum} />
-          }
+          } */}
+          <Switch>
+            <Route exact path="/albums" render={()=><Albums albums={albums} selectAlbum={this.selectAlbum} />} />
+            <Route path="/albums/:id" render={({match})=> <SingleAlbum selectedSong={selectedSong} start={this.start} album={selectedAlbum} albumId={match.params.id} selectAlbum={this.selectAlbum}/>} />
+            <Redirect from="/" to="/albums" />
+          </Switch>
+          
         </div>
         <Footer 
           selectedSong={selectedSong}
