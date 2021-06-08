@@ -5,7 +5,11 @@ import Footer from '../components/Footer';
 import Albums from '../components/Albums';
 import SingleAlbum from '../components/SingleAlbum';
 import audio from '../audio';
-import {Switch, Route, Redirect} from 'react-router-dom'
+import {Switch, Route, Redirect} from 'react-router-dom';
+import Artists from "../components/Artists"
+import SingleArtist from "../components/Artist";
+
+
 
 export default class Main extends React.Component {
   constructor(){
@@ -17,14 +21,16 @@ export default class Main extends React.Component {
       isPlaying: false,
       currentSongList: [],
       progress: 0,
+      artists: [],
+      selectedArtist : [],
     };
     this.selectAlbum = this.selectAlbum.bind(this);
-    this.deselectAlbum = this.deselectAlbum.bind(this);
     this.start = this.start.bind(this);
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
     this.next = this.next.bind(this);
     this.previous = this.previous.bind(this);
+    this.selectArtist = this.selectArtist.bind(this);
   }
   
   componentDidMount() {
@@ -39,16 +45,24 @@ export default class Main extends React.Component {
         progress: 100 * audio.currentTime / audio.duration
       });
     });
+    axios.get("/api/artists")
+    .then(res => res.data)
+    .then(serverArtists => this.setState({ artists: serverArtists }));
   }
   
   selectAlbum(albumId) {
+    let arr=[]
     axios.get(`/api/albums/${albumId}`)
       .then(res => res.data)
       .then(serverAlbum => this.setState({ selectedAlbum: serverAlbum }));
   }
 
-  deselectAlbum() {
-    this.setState({ selectedAlbum: {} });
+  selectArtist(artistId) {
+    let artist = axios.get(`/api/artists/${artistId}`)
+    let artistAlbum = axios.get(`/api/artists/${artistId}/albums`)
+    let artistSongs = axios.get(`/api/artists/${artistId}/songs`)
+      Promise.all([artist,artistAlbum,artistSongs])
+      .then(serverArtist => this.setState({ selectedArtist: serverArtist }));
   }
 
   start(song, songs) {
@@ -97,19 +111,16 @@ export default class Main extends React.Component {
   }
 
   render() {
-    const  { albums, selectedAlbum, selectedSong, isPlaying, progress } = this.state;
+    const  { albums, selectedAlbum, selectedSong, isPlaying, progress, artists, selectedArtist } = this.state;
     return (
       <div id="main" className="container-fluid">
-        <Sidebar deselectAlbum={this.deselectAlbum} />
+        <Sidebar/>
         <div className="col-xs-10">
-          {/* /* {!selectedAlbum.id ?
-            <Albums albums={albums} selectAlbum={this.selectAlbum} />
-            :
-            <SingleAlbum selectedSong={selectedSong} start={this.start} album={selectedAlbum} />
-          } */}
           <Switch>
             <Route exact path="/albums" render={()=><Albums albums={albums} selectAlbum={this.selectAlbum} />} />
-            <Route path="/albums/:id" render={({match})=> <SingleAlbum selectedSong={selectedSong} start={this.start} album={selectedAlbum} albumId={match.params.id} selectAlbum={this.selectAlbum}/>} />
+            <Route exact path="/albums/:id" render={({match})=> <SingleAlbum selectedSong={selectedSong} start={this.start} album={selectedAlbum} albumId={match.params.id} selectAlbum={this.selectAlbum}/>} />
+            <Route exact path="/artists" render={()=> <Artists artists={artists}/>}/>
+            <Route path="/artists/:id" render={({match}) => <SingleArtist artist={selectedArtist} artistId={match.params.id} selectArtist={this.selectArtist}/>} />
             <Redirect from="/" to="/albums" />
           </Switch>
           
